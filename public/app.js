@@ -1,3 +1,54 @@
+// ✏️ Cloudflare Worker 주소 (대시보드에서 Worker 만든 뒤 나온 주소로 변경, 끝에 / 없이)
+const API_BASE = "https://grouphug-reservation-api.YOUR_SUBDOMAIN.workers.dev";
+
+/**
+ * Cloudflare API 호출 공통 함수
+ * - API_BASE + path 로 요청
+ * - JSON 파싱, 오류 메시지 통일, 15초 타임아웃
+ */
+async function callApi(path, { method = "GET", body, timeoutMs = 15000 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        Accept: "application/json",
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store",
+      signal: controller.signal,
+    });
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch {
+      // JSON이 아닌 응답
+    }
+
+    if (!response.ok) {
+      const error = new Error(data.error || `요청에 실패했습니다. (${response.status})`);
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.");
+    }
+    if (error instanceof TypeError) {
+      throw new Error("예약 서버에 연결할 수 없습니다. 네트워크를 확인해주세요.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const state = {
   rooms: [],
   selectedDate: null,
@@ -224,13 +275,7 @@ async function loadSchedule({ forceRefresh = false } = {}) {
 
     if (forceRefresh) params.set("refresh", "1");
 
-    const response = await fetch(`/api/schedule-all?${params.toString()}`, {
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "예약 정보를 불러오지 못했습니다.");
+    const data = await callApi(`/api/schedule-all?${params.toString()}`);
 
     renderSchedule(data.schedules || {});
     requestAnimationFrame(scrollToCurrentTime);
@@ -292,18 +337,7 @@ function closePasswordOverlay() {
 }
 
 async function verifyPassword(password) {
-  const response = await fetch("/api/kiosk/unlock", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ password }),
-    cache: "no-store",
-  });
-
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "비밀번호를 확인하지 못했습니다.");
+  await callApi("/api/kiosk/unlock", { method: "POST", body: { password } });
   return true;
 }
 
@@ -382,9 +416,7 @@ document.addEventListener("fullscreenchange", () => {
 
 async function init() {
   try {
-    const response = await fetch("/api/config", { cache: "no-store" });
-    const config = await response.json();
-    if (!response.ok) throw new Error("설정 정보를 불러오지 못했습니다.");
+    const config = await callApi("/api/config");
 
     state.rooms = config.rooms || [];
     state.selectedDate = config.today || null;
