@@ -1,6 +1,5 @@
 // ✏️ Cloudflare Worker 주소 (대시보드에서 Worker 만든 뒤 나온 주소로 변경, 끝에 / 없이)
-const API_BASE = "https://grouphug-reservation-api.YOUR_SUBDOMAIN.workers.dev";
-
+const API_BASE = "https://grouphug-reservation-api.aggh21-ai.workers.dev";
 /**
  * Cloudflare API 호출 공통 함수
  * - API_BASE + path 로 요청
