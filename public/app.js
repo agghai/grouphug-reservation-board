@@ -61,20 +61,9 @@ const notice = document.querySelector("#notice");
 const refreshButton = document.querySelector("#refreshButton");
 const refreshStatus = document.querySelector("#refreshStatus");
 const fullscreenButton = document.querySelector("#fullscreenButton");
-const passwordOverlay = document.querySelector("#passwordOverlay");
-const passwordForm = document.querySelector("#passwordForm");
-const passwordInput = document.querySelector("#passwordInput");
-const passwordError = document.querySelector("#passwordError");
-const passwordCancel = document.querySelector("#passwordCancel");
-const passwordSubmit = document.querySelector("#passwordSubmit");
-const passwordTitle = document.querySelector("#passwordTitle");
-const passwordDescription = document.querySelector("#passwordDescription");
 const queryDate = document.querySelector("#queryDate");
 
 let refreshTimer = null;
-let passwordMode = "exit";
-let kioskActivated = false;
-let authorizedFullscreenExit = false;
 
 function formatDisplayDate(dateKey) {
   if (!dateKey) return "";
@@ -308,42 +297,9 @@ function setFullscreenButtonState() {
   fullscreenButton.setAttribute("title", isFullscreen ? "전체화면 종료" : "전체화면");
 }
 
-function openPasswordOverlay(mode) {
-  passwordMode = mode;
-  passwordForm.reset();
-  passwordError.textContent = "";
-
-  if (mode === "exit") {
-    passwordTitle.textContent = "전체화면을 종료할까요?";
-    passwordDescription.textContent = "관리자 비밀번호를 입력하면 일반 화면으로 돌아갑니다.";
-    passwordCancel.hidden = false;
-  } else {
-    passwordTitle.textContent = "화면이 잠겼습니다";
-    passwordDescription.textContent = "전체화면이 종료되었습니다. 계속 사용하려면 관리자 비밀번호를 입력해주세요.";
-    passwordCancel.hidden = true;
-  }
-
-  passwordOverlay.hidden = false;
-  document.body.classList.add("modal-open");
-  requestAnimationFrame(() => passwordInput.focus());
-}
-
-function closePasswordOverlay() {
-  passwordOverlay.hidden = true;
-  document.body.classList.remove("modal-open");
-  passwordForm.reset();
-  passwordError.textContent = "";
-}
-
-async function verifyPassword(password) {
-  await callApi("/api/kiosk/unlock", { method: "POST", body: { password } });
-  return true;
-}
-
 async function enterFullscreen() {
   try {
     await document.documentElement.requestFullscreen();
-    kioskActivated = true;
   } catch (error) {
     showNotice("이 브라우저에서는 전체화면을 시작할 수 없습니다.");
   }
@@ -351,7 +307,7 @@ async function enterFullscreen() {
 
 function handleFullscreenButton() {
   if (document.fullscreenElement) {
-    openPasswordOverlay("exit");
+    document.exitFullscreen();
   } else {
     enterFullscreen();
   }
@@ -363,55 +319,7 @@ refreshButton.addEventListener("click", () => {
 
 fullscreenButton.addEventListener("click", handleFullscreenButton);
 
-passwordCancel.addEventListener("click", () => {
-  if (passwordMode === "exit") closePasswordOverlay();
-});
-
-passwordForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const password = passwordInput.value;
-  passwordError.textContent = "";
-  passwordSubmit.disabled = true;
-  passwordSubmit.textContent = "확인 중...";
-
-  try {
-    await verifyPassword(password);
-
-    if (passwordMode === "exit" && document.fullscreenElement) {
-      authorizedFullscreenExit = true;
-      closePasswordOverlay();
-      await document.exitFullscreen();
-    } else {
-      closePasswordOverlay();
-    }
-  } catch (error) {
-    passwordError.textContent = error.message || "비밀번호가 올바르지 않습니다.";
-    passwordInput.select();
-  } finally {
-    passwordSubmit.disabled = false;
-    passwordSubmit.textContent = "확인";
-  }
-});
-
-document.addEventListener("fullscreenchange", () => {
-  const isFullscreen = Boolean(document.fullscreenElement);
-  setFullscreenButtonState();
-
-  if (isFullscreen) {
-    kioskActivated = true;
-    return;
-  }
-
-  if (authorizedFullscreenExit) {
-    authorizedFullscreenExit = false;
-    return;
-  }
-
-  if (kioskActivated) {
-    openPasswordOverlay("unlock");
-  }
-});
+document.addEventListener("fullscreenchange", setFullscreenButtonState);
 
 async function init() {
   try {
