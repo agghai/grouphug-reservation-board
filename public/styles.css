@@ -1,0 +1,615 @@
+:root {
+  --brand: #4c0bce;
+  --brand-deep: #453064;
+  --brand-mid: #725ca0;
+  --brand-soft: #978ca6;
+  --brand-tint: #f7f4fb;
+  --bg: #f5f4f2;
+  --surface: #ffffff;
+  --text: #29262d;
+  --muted: #817b85;
+  --line: #efedea;
+  --line-strong: #e4e0dc;
+  --past-bg: #faf9f7;
+  --past-text: #aaa5ad;
+  --danger-bg: #fff3f3;
+  --danger-text: #9a2d38;
+
+  /* 화면 비율에 따라 자연스럽게 커지고 작아지는 글자 크기 */
+  --font-title: clamp(21px, 2.15vmin, 28px);
+  --font-date: clamp(18px, 1.85vmin, 24px);
+  --font-room: clamp(14px, 1.45vmin, 18px);
+  --font-time-head: clamp(11px, 1.00vmin, 13px);
+  --font-time-start: clamp(14px, 1.30vmin, 17px);
+  --font-time-end: clamp(11px, 1.12vmin, 14px);
+  --font-available: clamp(12px, 1.15vmin, 15px);
+  --font-customer: clamp(14px, 1.35vmin, 17px);
+  --font-control-icon: clamp(17px, 1.45vmin, 19px);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.modal-open { overflow: hidden; }
+
+button,
+input { font: inherit; }
+
+button { -webkit-tap-highlight-color: transparent; }
+
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(1280px, calc(100% - 32px));
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  padding: 14px 0 18px;
+  overflow: hidden;
+}
+
+.topbar {
+  position: relative;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  min-height: 64px;
+  margin-bottom: 12px;
+  padding: 0 20px;
+  flex: 0 0 auto;
+
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(40, 34, 45, .03);
+}
+
+h1,
+h2,
+p { margin-top: 0; }
+
+.topbar-title {
+  min-width: 0;
+}
+
+.topbar-title h1 {
+  margin: 0;
+  color: #252228;
+  font-size: var(--font-title);
+  font-weight: 820;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 0 0 auto;
+}
+
+.query-date {
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+
+  color: #6b5590;
+  font-size: var(--font-date);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
+.topbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.control-btn {
+  appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e2ded9;
+  border-radius: 12px;
+  background: #fff;
+  color: #6f6875;
+  cursor: pointer;
+  box-shadow: 0 1px 5px rgba(40, 34, 45, .035);
+  transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+.control-btn:hover {
+  transform: translateY(-1px);
+  border-color: #d6cdea;
+  background: var(--brand-tint);
+  color: var(--brand-deep);
+  box-shadow: 0 4px 12px rgba(40, 34, 45, .06);
+}
+
+.control-btn:disabled {
+  cursor: wait;
+  opacity: .55;
+  transform: none;
+}
+
+.control-btn.is-loading .control-icon { animation: spin .8s linear infinite; }
+
+.control-icon {
+  display: block;
+  font-size: var(--font-control-icon);
+  line-height: 1;
+}
+
+.schedule-section {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow:
+    0 16px 40px rgba(44, 39, 47, .045),
+    0 2px 6px rgba(44, 39, 47, .025);
+}
+
+.schedule-section::before {
+  position: absolute;
+  z-index: 12;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--brand);
+  content: "";
+}
+
+.table-wrap {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.table-wrap::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.table-wrap::-webkit-scrollbar-track { background: #f3f1ef; }
+
+.table-wrap::-webkit-scrollbar-thumb {
+  border: 2px solid #f3f1ef;
+  border-radius: 999px;
+  background: #cfc9d2;
+}
+
+.table-wrap::-webkit-scrollbar-thumb:hover { background: #a99fb4; }
+
+.schedule-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.schedule-table th,
+.schedule-table td {
+  border-right: 1px solid var(--line);
+}
+
+.schedule-table th:last-child,
+.schedule-table td:last-child { border-right: 0; }
+
+.schedule-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  height: 56px;
+  padding: 3px 18px 0;
+  background: rgba(253, 252, 251, .98);
+  border-bottom: 1px solid var(--line-strong);
+  color: #353138;
+  text-align: center;
+  font-size: var(--font-room);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  backdrop-filter: blur(8px);
+}
+
+.schedule-table thead .room-heading {
+  box-shadow: inset 0 3px 0 transparent;
+}
+
+.schedule-table thead .room-heading:first-of-type {
+  color: var(--brand-deep);
+}
+
+.schedule-table thead .time-heading {
+  left: 0;
+  z-index: 10;
+  width: 22%;
+  padding-left: 24px;
+  color: #817b84;
+  text-align: left;
+  font-size: var(--font-time-head);
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.schedule-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--line);
+}
+
+.schedule-table td {
+  height: 58px;
+  padding: 8px 16px;
+  background: #fff;
+  vertical-align: middle;
+}
+
+.time-cell {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  width: 22%;
+  padding-left: 24px !important;
+  background: #fcfbfa !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.time-start {
+  color: #3c383f;
+  font-size: var(--font-time-start);
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+
+.time-separator {
+  margin: 0 6px;
+  color: #b4afb7;
+  font-size: var(--font-time-end);
+  font-weight: 600;
+}
+
+.time-end {
+  color: #7f7982;
+  font-size: var(--font-time-end);
+  font-weight: 650;
+}
+
+.status-cell {
+  text-align: center;
+  transition: background .15s ease;
+}
+
+.status-cell.available-cell { background: #fff; }
+
+/* 예약 여부를 한눈에 구분하되, 클릭 가능한 버튼처럼 보이지 않게 셀 자체에만 색을 준다. */
+.status-cell.reserved-cell {
+  background: #f1ecfb;
+  color: #43246f;
+  font-weight: 800;
+}
+
+.status-text {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+  letter-spacing: -.025em;
+}
+
+.status-text.available {
+  color: #736d77;
+  font-size: var(--font-available);
+  font-weight: 680;
+}
+
+.status-text.customer {
+  color: #4b306f;
+  font-size: var(--font-customer);
+  font-weight: 850;
+}
+
+/* 지난 시간은 현재/예정 시간보다 한 단계만 낮춰, 화면 전체가 지나치게 흐려지지 않도록 한다. */
+.schedule-table tr.past-slot td,
+.schedule-table tr.past-slot .time-cell {
+  background: var(--past-bg) !important;
+}
+
+.schedule-table tr.past-slot .time-start,
+.schedule-table tr.past-slot .time-separator,
+.schedule-table tr.past-slot .time-end,
+.schedule-table tr.past-slot .status-text {
+  color: var(--past-text);
+}
+
+.empty-cell {
+  color: #c7c2c9;
+  text-align: center;
+}
+
+.skeleton {
+  display: inline-block;
+  width: min(104px, 68%);
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #efedeb, #f8f7f5, #efedeb);
+  background-size: 200% 100%;
+  animation: loading 1.2s infinite;
+}
+
+.loading-row td { background: #fff !important; }
+.loading-row .time-cell { background: #fbfaf9 !important; }
+
+.notice {
+  margin: 14px;
+  border: 1px solid #f2d8dc;
+  border-radius: 12px;
+  padding: 11px 14px;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.password-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(29, 25, 32, .70);
+  backdrop-filter: blur(12px);
+}
+
+.password-overlay[hidden] { display: none; }
+
+.password-card {
+  width: min(420px, 100%);
+  border: 1px solid #ded9e4;
+  border-radius: 24px;
+  background: #fff;
+  padding: 30px;
+  box-shadow: 0 28px 80px rgba(23, 20, 27, .25);
+  text-align: center;
+}
+
+.lock-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  background: var(--brand-tint);
+  font-size: 23px;
+}
+
+.password-kicker {
+  margin-bottom: 5px;
+  color: var(--brand);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.password-card h2 {
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 22px;
+  letter-spacing: -.035em;
+}
+
+.password-description {
+  margin-bottom: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.password-form input {
+  width: 100%;
+  height: 50px;
+  border: 1px solid #ddd9df;
+  border-radius: 13px;
+  outline: none;
+  padding: 0 15px;
+  background: #faf9f8;
+  color: var(--text);
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: .12em;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.password-form input:focus {
+  border-color: #a99bc7;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(76, 11, 206, .06);
+}
+
+.password-error {
+  min-height: 19px;
+  margin: 8px 0 0;
+  color: #ad2b3b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.password-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.password-actions:has(.secondary[hidden]) { grid-template-columns: 1fr; }
+
+.modal-btn {
+  appearance: none;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.modal-btn.secondary {
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: #625d65;
+}
+
+.modal-btn.primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.modal-btn:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes loading {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (min-width: 1100px) and (min-height: 820px) {
+  .schedule-table td { height: 61px; }
+  .schedule-table thead th { height: 58px; }
+}
+
+@media (max-width: 760px) {
+  .page-shell {
+    width: min(100% - 18px, 1280px);
+    padding: 14px 0 22px;
+  }
+
+  .topbar {
+    gap: 12px;
+    min-height: 54px;
+    margin-bottom: 10px;
+  }
+
+  .control-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .schedule-section { border-radius: 15px; }
+  .schedule-table { min-width: 700px; }
+
+  .schedule-table thead th {
+    height: 52px;
+    padding: 3px 12px 0;
+  }
+
+  .schedule-table thead .time-heading {
+    width: 24%;
+    padding-left: 16px;
+  }
+
+  .schedule-table td {
+    height: 56px;
+    padding: 8px 11px;
+  }
+
+  .time-cell {
+    width: 24%;
+    padding-left: 16px !important;
+  }
+
+  .time-start {
+    display: block;
+  }
+
+  .time-separator { display: none; }
+
+  .time-end {
+    display: block;
+    margin-top: 1px;
+  }
+
+  .topbar-right { gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* 24시간 보드: 페이지는 고정하고 예약표만 스크롤 */
+@media (max-width: 720px) {
+  .page-shell {
+    width: calc(100% - 20px);
+    padding: 12px 0 16px;
+  }
+
+  .topbar { margin-bottom: 10px; }
+}

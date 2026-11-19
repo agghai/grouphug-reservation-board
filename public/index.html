@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f4f3f1" />
+    <title>그룹허그 예약 현황</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>그룹허그 예약 현황</h1>
+        </div>
+
+        <div class="topbar-right">
+          <p id="queryDate" class="query-date" aria-label="조회 날짜"></p>
+
+          <div class="topbar-actions" aria-label="화면 제어">
+            <button id="refreshButton" class="control-btn" type="button" aria-label="예약 현황 새로고침" title="새로고침">
+              <span class="control-icon" aria-hidden="true">↻</span>
+              <span class="control-text sr-only">새로고침</span>
+            </button>
+            <button id="fullscreenButton" class="control-btn" type="button" aria-label="전체화면" title="전체화면">
+              <span class="control-icon" aria-hidden="true">⛶</span>
+              <span class="control-text sr-only">전체화면</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="schedule-section" aria-label="오늘 예약 현황">
+        <span id="refreshStatus" class="sr-only" aria-live="polite"></span>
+        <div id="notice" class="notice" hidden></div>
+
+        <div class="table-wrap">
+          <table class="schedule-table">
+            <thead>
+              <tr id="scheduleHead">
+                <th scope="col" class="time-heading">시간</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="passwordOverlay" class="password-overlay" hidden>
+      <section class="password-card" role="dialog" aria-modal="true" aria-labelledby="passwordTitle">
+        <div class="lock-mark" aria-hidden="true">🔒</div>
+        <p class="password-kicker">관리자 확인</p>
+        <h2 id="passwordTitle">비밀번호를 입력해주세요</h2>
+        <p id="passwordDescription" class="password-description">전체화면을 종료하려면 관리자 비밀번호가 필요합니다.</p>
+
+        <form id="passwordForm" class="password-form">
+          <label for="passwordInput" class="sr-only">관리자 비밀번호</label>
+          <input
+            id="passwordInput"
+            name="password"
+            type="password"
+            inputmode="numeric"
+            autocomplete="current-password"
+            placeholder="비밀번호"
+            required
+          />
+          <p id="passwordError" class="password-error" aria-live="polite"></p>
+          <div class="password-actions">
+            <button id="passwordCancel" class="modal-btn secondary" type="button">취소</button>
+            <button id="passwordSubmit" class="modal-btn primary" type="submit">확인</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </body>
+</html>
